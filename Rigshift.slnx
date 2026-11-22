@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Rigshift/Rigshift.csproj" />
+  <Project Path="Rigshift.Tests/Rigshift.Tests.csproj" />
+</Solution>

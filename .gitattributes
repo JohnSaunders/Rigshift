@@ -1,0 +1,17 @@
+# Normalise text to LF in the repository, so a contributor whose git has
+# core.autocrlf=true cannot rewrite whole files. The app targets Windows, and LF
+# in the repository is fine for MSBuild, the C# compiler, PowerShell 7 and
+# Git for Windows.
+* text=auto eol=lf
+
+# Binaries git must never touch.
+*.bmp binary
+*.ico binary
+*.png binary
+*.exe binary
+*.dll binary
+*.zip binary
+
+# Files committed before this file existed are a mix of LF and CRLF. A single
+# `git add --renormalize .` brings the index in line; until then, the first commit
+# that touches one of those files will show it as wholly changed.

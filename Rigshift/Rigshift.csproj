@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Version>0.1.0</Version>
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- Keep the assembly informational version a clean "0.1.0": without this the SDK
+         appends a +<short-sha> source-revision stamp, which shows up in File Properties,
+         Task Manager and the installer's uninstall entry as an odd version string. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Rigshift</RootNamespace>
+    <ApplicationIcon>Assets\rigshift-app.ico</ApplicationIcon>
+    <!-- Tray app: no console window should ever flash -->
+    <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Update="Assets\rigshift.ico" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="rigshift.example.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

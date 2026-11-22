@@ -1,0 +1,50 @@
+{
+  // Copy this file to %APPDATA%\Rigshift\rigshift.json and edit that copy.
+  // Lookup order is the per-user file, then rigshift.json beside the executable,
+  // then the built-in default (this file). Comments and trailing commas are allowed.
+
+  "idleColor": "#8A8A8E",
+
+  "definitions": {
+    // Native Windows Ollama. Launched bare, "ollama app.exe" opens its window.
+    // To start it in the tray only, point path at a shortcut whose arguments are "--hide".
+    "ollama": {
+      "kind": "app",
+      "processName": "ollama app",
+      "path": "%LOCALAPPDATA%\\Programs\\Ollama\\ollama app.exe"
+    },
+    "ollamaServer": { "kind": "app", "processName": "ollama" },
+    "ollamaRunner": { "kind": "app", "processName": "llama-server" },
+
+    "wsl": { "kind": "wsl" },
+
+    "rider":    { "kind": "app", "processName": "rider64" },
+    "webstorm": { "kind": "app", "processName": "webstorm64" },
+    "vscode":   { "kind": "app", "processName": "Code" },
+    "node":     { "kind": "app", "processName": "node" }
+  },
+
+  "loadouts": [
+    {
+      "name": "AI",
+      "toggle": true,
+      "color": "#2E6BFF",
+      "start": ["ollama"],
+      "killOnDisable": ["ollama", "ollamaServer", "ollamaRunner"]
+    },
+    {
+      "name": "Dev",
+      "toggle": true,
+      "color": "#FF3B30",
+      "start": ["wsl"],
+      "killOnDisable": ["wsl"]
+    },
+    {
+      "name": "Game",
+      "toggle": false,
+      "kill": ["node", "ollama", "ollamaServer", "ollamaRunner", "wsl"],
+      "hardShutdown": true,
+      "flushDns": true
+    }
+  ]
+}

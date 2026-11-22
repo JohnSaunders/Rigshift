@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Check the tag matches the project version
+        shell: pwsh
+        run: |
+          $Tag = $env:GITHUB_REF -replace '^refs/tags/v', ''
+          [xml] $Csproj = Get-Content -Raw Rigshift/Rigshift.csproj
+          $Version = $Csproj.Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          if ($Tag -ne $Version) {
+            Write-Error "Tag v$Tag does not match <Version>$Version</Version> in Rigshift/Rigshift.csproj. Bump one to match the other before tagging."
+            exit 1
+          }
+          Write-Host "Tag v$Tag matches the project version."
+
+      - name: Test
+        run: dotnet test --configuration Release
+
+      - name: Publish self-contained win-x64
+        run: dotnet publish Rigshift/Rigshift.csproj --configuration Release --runtime win-x64 --self-contained true --output publish
+
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path publish/* -DestinationPath rigshift-win-x64.zip
+
+      - name: Install Inno Setup
+        run: choco install innosetup --version 6.7.1 -y --no-progress
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $Version = $env:GITHUB_REF -replace '^refs/tags/v', ''
+          & ./installer/build.ps1 -Version $Version
+
+      - name: Checksums
+        shell: pwsh
+        run: |
+          $files = @('rigshift-win-x64.zip') + (Get-ChildItem artifacts/installer -Filter *.exe | ForEach-Object { $_.FullName })
+          $lines = foreach ($f in $files) {
+            $hash = (Get-FileHash -Path $f -Algorithm SHA256).Hash.ToLower()
+            "$hash  $(Split-Path -Path $f -Leaf)"
+          }
+          # LF, no BOM: this file is read by sha256sum on other platforms, which
+          # treats a carriage return as part of the file name.
+          $text = ($lines -join "`n") + "`n"
+          [IO.File]::WriteAllText((Join-Path $PWD 'SHA256SUMS.txt'), $text, [Text.UTF8Encoding]::new($false))
+          Get-Content SHA256SUMS.txt
+
+      - name: Attach the zip, installer and checksums to the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: gh release create "${{ github.ref_name }}" rigshift-win-x64.zip artifacts/installer/*.exe SHA256SUMS.txt --title "${{ github.ref_name }}" --generate-notes
